@@ -1,7 +1,7 @@
-import type {NextConfig} from 'next';
-
-const nextConfig: NextConfig = {
-  /* config options here */
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: 'export',
+  distDir: 'out', // Add this line to explicitly set the output directory
   typescript: {
     ignoreBuildErrors: true,
   },
