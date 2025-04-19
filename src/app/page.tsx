@@ -19,10 +19,12 @@ export default function Home() {
   const [choices, setChoices] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [storyInitialized, setStoryInitialized] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  // useRef to track if the story has been initialized
+  const storyInitialized = useRef(false);
 
   // Check system preference for dark mode on initial load
   useEffect(() => {
@@ -45,6 +47,11 @@ export default function Home() {
   // Initialize story based on selected theme
   useEffect(() => {
     const initializeStory = async () => {
+      // Only initialize the story if it hasn't been initialized yet
+      if (storyInitialized.current) {
+        return;
+      }
+
       setLoading(true);
       setError(null);
       try {
@@ -56,7 +63,9 @@ export default function Home() {
         setStorySnippets([initialStory.storySeed]);
         setDisplayedSnippets([initialStory.storySeed]);
         setChoices(initialChoices);
-        setStoryInitialized(true);
+        
+        // Set the ref to true after successful initialization
+        storyInitialized.current = true;
         
         console.log('Story initialized:', {
           snippet: initialStory.storySeed,
@@ -70,10 +79,11 @@ export default function Home() {
       }
     };
 
-    if (!storyInitialized) {
+    // Call initializeStory only if it hasn't been initialized yet
+    if (!storyInitialized.current) {
       initializeStory();
     }
-  }, [theme, storyInitialized]);
+  }, [theme]);
 
   // Modified typewriter effect to handle updates more reliably
   useEffect(() => {
@@ -173,15 +183,15 @@ export default function Home() {
   };
 
   const handleThemeChange = (newTheme: string) => {
+    storyInitialized.current = false;
     setTheme(newTheme);
     setStorySnippets([]);
     setDisplayedSnippets([]);
     setChoices([]);
-    setStoryInitialized(false);
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2 bg-background">
+    <div key={isDarkMode} className="flex flex-col items-center justify-center min-h-screen py-2 bg-background">
       {/* Dark Mode Toggle */}
       <div className="absolute top-4 right-4">
         <Button
@@ -254,7 +264,7 @@ export default function Home() {
                   </Button>
                 ))
               ) : (
-                !loading && storyInitialized && (
+                !loading && storyInitialized.current && (
                   <div className="text-center text-muted-foreground italic">
                     The story has reached its conclusion.
                   </div>
