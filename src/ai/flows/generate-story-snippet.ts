@@ -7,7 +7,7 @@ import {z} from 'genkit';
 const GenerateStorySnippetInputSchema = z.object({
   theme: z.string().describe('The theme of the story (e.g., space, fantasy, horror).'),
   previousSnippets: z.array(z.string()).describe('An array of previous story snippets.'),
-  currentChoice: z.string().describe('The user\'s current choice that influences the story.'),
+  currentChoice: z.string().describe("The user's current choice that influences the story."),
 });
 export type GenerateStorySnippetInput = z.infer<typeof GenerateStorySnippetInputSchema>;
 
@@ -27,7 +27,7 @@ const prompt = ai.definePrompt({
     schema: z.object({
       theme: z.string().describe('The theme of the story.'),
       previousSnippets: z.array(z.string()).describe('Previous story snippets.'),
-      currentChoice: z.string().describe('The user\'s current choice.'),
+      currentChoice: z.string().describe("The user's current choice."),
     }),
   },
   output: {
@@ -48,10 +48,10 @@ Previous story snippets:
 The user has chosen: {{{currentChoice}}}
 
 Generate the next part of the story based on the user's choice. Your response must include:
-1. A story snippet (nextSnippet) that continues the narrative (150-200 words)
-2. Exactly three choices (nextChoices) for what the user could do next
+1. A story snippet (nextSnippet) that continues the narrative using **300-450words** (approximately 2000-2800 characters). 
+2. Exactly three choices (nextChoices) for what the user could do next.
 
-Make your story engaging and immersive. Write in second person ("you").`,
+Make your story engaging and immersive. Use vivid imagery, sensory detail, and write in second person ("you"). Build tension or wonder as appropriate to the theme.`,
 });
 
 const generateStorySnippetFlow = ai.defineFlow<
@@ -65,9 +65,8 @@ const generateStorySnippetFlow = ai.defineFlow<
   },
   async input => {
     try {
-      const {output} = await prompt(input);
-      
-      // Ensure we have a valid story snippet
+      const { output } = await prompt(input);
+
       if (!output || !output.nextSnippet || output.nextSnippet.trim() === '') {
         console.error('Error: No valid story snippet returned from AI');
         return {
@@ -75,8 +74,7 @@ const generateStorySnippetFlow = ai.defineFlow<
           nextChoices: ['Explore further', 'Talk to someone nearby', 'Change direction']
         };
       }
-      
-      // Ensure we have valid nextChoices
+
       if (!output.nextChoices || !Array.isArray(output.nextChoices) || output.nextChoices.length === 0) {
         console.error('Error: No valid choices returned from AI');
         return {
@@ -84,18 +82,17 @@ const generateStorySnippetFlow = ai.defineFlow<
           nextChoices: ['Explore further', 'Talk to someone nearby', 'Change direction']
         };
       }
-      
-      // Ensure we have exactly 3 choices
+
       const choices = output.nextChoices.slice(0, 3);
       while (choices.length < 3) {
         choices.push(["Explore further", "Look around", "Continue onward"][choices.length]);
       }
-      
+
       console.log('Story snippet generated successfully:', {
         snippetLength: output.nextSnippet.length,
         choices: choices
       });
-      
+
       return {
         nextSnippet: output.nextSnippet,
         nextChoices: choices

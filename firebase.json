@@ -1,0 +1,9 @@
+{
+  "hosting": {
+    "site": "story-weaver-n3ub7",
+    "source": ".",
+    "frameworksBackend": {
+      "region": "us-central1"
+    }
+  }
+}

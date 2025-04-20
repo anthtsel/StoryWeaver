@@ -4,27 +4,53 @@ import { useState, useEffect, useRef } from 'react';
 import {seedStory} from '@/ai/flows/seed-story';
 import {generateStorySnippet} from '@/ai/flows/generate-story-snippet';
 import {Button} from '@/components/ui/button';
-import { Moon, Sun, Loader2 } from 'lucide-react';
+import { Moon, Sun, Loader2, RefreshCw } from 'lucide-react';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {ScrollArea} from '@/components/ui/scroll-area';
 import {Separator} from '@/components/ui/separator';
+import {Progress} from '@/components/ui/progress';
 
 const themes = ['space', 'fantasy', 'horror'];
+const arcTypes = ['hero-journey', 'mystery', 'quest', 'revenge', 'romance'];
+
+// Define story phases and their progression percentages
+const storyPhases = [
+  { name: 'setup', maxProgress: 15 },
+  { name: 'rising action', maxProgress: 40 },
+  { name: 'confrontation', maxProgress: 65 },
+  { name: 'climax', maxProgress: 85 },
+  { name: 'resolution', maxProgress: 100 }
+];
+
+// Define progression points - how many choices to advance each phase
+const choicesPerPhase = {
+  'setup': 5, // 5 choices to complete setup
+  'rising action': 10, // 10 more choices for rising action
+  'confrontation': 10, // 10 more choices for confrontation
+  'climax': 5, // 5 more choices for climax
+  'resolution': 5 // 5 final choices to reach conclusion
+};
+
+// Total choices for a complete story
+const totalStoryChoices = Object.values(choicesPerPhase).reduce((sum, val) => sum + val, 0);
 
 export default function Home() {
   const [theme, setTheme] = useState(themes[0]);
+  const [arcType, setArcType] = useState(arcTypes[0]);
   const [displayedSnippets, setDisplayedSnippets] = useState<string[]>([]);
   const [storySnippets, setStorySnippets] = useState<string[]>([]);
   const [choices, setChoices] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [storyInitialized, setStoryInitialized] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [arcProgress, setArcProgress] = useState(0);
+  const [storyPhase, setStoryPhase] = useState<string>('setup');
+  const [storyComplete, setStoryComplete] = useState(false);
+  const [choicesMade, setChoicesMade] = useState(0);
   
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-
-  // useRef to track if the story has been initialized
-  const storyInitialized = useRef(false);
 
   // Check system preference for dark mode on initial load
   useEffect(() => {
@@ -44,18 +70,19 @@ export default function Home() {
 
   const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
 
-  // Initialize story based on selected theme
+  // Initialize story based on selected theme and arc type
   useEffect(() => {
     const initializeStory = async () => {
-      // Only initialize the story if it hasn't been initialized yet
-      if (storyInitialized.current) {
-        return;
-      }
-
       setLoading(true);
       setError(null);
+      setArcProgress(0);
+      setStoryPhase('setup');
+      setStoryComplete(false);
+      setChoicesMade(0);
+      
       try {
-        const initialStory = await seedStory({theme});
+        // Pass arc type to seed story
+        const initialStory = await seedStory({theme, arcType});
         
         // Use AI-generated choices from seedStory if available, otherwise use fallback choices
         const initialChoices = initialStory.initialChoices || ['Explore the surroundings', 'Continue forward', 'Go back'];
@@ -63,13 +90,12 @@ export default function Home() {
         setStorySnippets([initialStory.storySeed]);
         setDisplayedSnippets([initialStory.storySeed]);
         setChoices(initialChoices);
-        
-        // Set the ref to true after successful initialization
-        storyInitialized.current = true;
+        setStoryInitialized(true);
         
         console.log('Story initialized:', {
           snippet: initialStory.storySeed,
-          choices: initialChoices
+          choices: initialChoices,
+          arcType
         });
       } catch (e: any) {
         setError(e.message || 'Failed to seed story.');
@@ -79,11 +105,10 @@ export default function Home() {
       }
     };
 
-    // Call initializeStory only if it hasn't been initialized yet
-    if (!storyInitialized.current) {
+    if (!storyInitialized) {
       initializeStory();
     }
-  }, [theme]);
+  }, [theme, arcType, storyInitialized]);
 
   // Modified typewriter effect to handle updates more reliably
   useEffect(() => {
@@ -131,6 +156,45 @@ export default function Home() {
     }
   }, [displayedSnippets]);
 
+  // Update story phase and progress based on choices made
+  useEffect(() => {
+    if (storyComplete) return;
+    
+    // Calculate story progress based on choices made
+    const progressPercentage = Math.min(Math.floor((choicesMade / totalStoryChoices) * 100), 100);
+    
+    // Set the current phase based on progress
+    let currentPhaseIndex = 0;
+    let cumulativeChoices = 0;
+    
+    for (let i = 0; i < Object.keys(choicesPerPhase).length; i++) {
+      const phaseName = Object.keys(choicesPerPhase)[i];
+      const phaseChoices = choicesPerPhase[phaseName as keyof typeof choicesPerPhase];
+      
+      cumulativeChoices += phaseChoices;
+      if (choicesMade < cumulativeChoices) {
+        currentPhaseIndex = i;
+        break;
+      }
+    }
+    
+    // If we've gone through all choices, set to the last phase
+    if (choicesMade >= totalStoryChoices) {
+      currentPhaseIndex = storyPhases.length - 1;
+    }
+    
+    // Set the current phase and progress
+    const newPhase = storyPhases[currentPhaseIndex].name;
+    setStoryPhase(newPhase);
+    setArcProgress(progressPercentage);
+    
+    // Check if we should end the story
+    if (progressPercentage >= 100) {
+      console.log('Story progress reached 100%');
+    }
+    
+  }, [choicesMade, storyComplete]);
+
   const handleChoice = async (choice: string) => {
     if(loading) {
       return;
@@ -145,20 +209,41 @@ export default function Home() {
     const choiceText = `You chose: ${choice}`;
     setStorySnippets([...storySnippets, choiceText]);
     
+    // Increment choices made
+    const newChoicesMade = choicesMade + 1;
+    setChoicesMade(newChoicesMade);
+    
+    // Check if we've reached the total story length
+    const newProgressPercentage = Math.min(Math.floor((newChoicesMade / totalStoryChoices) * 100), 100);
+    const shouldEndStory = newProgressPercentage >= 100;
+    
     try {
       const newSnippet = await generateStorySnippet({
         theme,
+        arcType,
         previousSnippets: storySnippets,
         currentChoice: choice,
+        currentPhase: storyPhase,
+        progress: newProgressPercentage,
       });
       
       console.log('Generated new snippet:', {
         snippetLength: newSnippet.nextSnippet.length,
-        choices: newSnippet.nextChoices
+        choices: newSnippet.nextChoices,
+        storyPhase,
+        progress: newProgressPercentage,
+        choicesMade: newChoicesMade,
+        totalChoices: totalStoryChoices
       });
       
       // Only add the new snippet after the choice was displayed
       setStorySnippets(prevSnippets => [...prevSnippets, newSnippet.nextSnippet]);
+      
+      // Check if story is complete (either from AI signal or from our progress calculation)
+      if (newSnippet.isStoryComplete || shouldEndStory) {
+        handleStoryCompletion();
+        return;
+      }
       
       // Set new choices, ensuring we always have an array
       if (newSnippet.nextChoices && Array.isArray(newSnippet.nextChoices) && newSnippet.nextChoices.length > 0) {
@@ -182,16 +267,70 @@ export default function Home() {
     }
   };
 
+  // Handle story completion
+  const handleStoryCompletion = async () => {
+    try {
+      // Generate a final ending snippet if needed
+      if (arcProgress < 100) {
+        setArcProgress(100);
+      }
+      
+      // Add a closing message if the story didn't provide one
+      setStorySnippets(prevSnippets => {
+        const lastSnippet = prevSnippets[prevSnippets.length - 1];
+        if (!lastSnippet.includes("THE END") && !lastSnippet.includes("The End")) {
+          return [...prevSnippets, "\n\nYour journey has reached its conclusion. THE END."];
+        }
+        return prevSnippets;
+      });
+      
+      setStoryComplete(true);
+      setChoices([]);
+      setStoryPhase('complete');
+      
+    } catch (e) {
+      console.error('Error completing story:', e);
+    }
+  };
+
   const handleThemeChange = (newTheme: string) => {
-    storyInitialized.current = false;
     setTheme(newTheme);
+    resetStory();
+  };
+
+  const handleArcTypeChange = (newArcType: string) => {
+    setArcType(newArcType);
+    resetStory();
+  };
+
+  const resetStory = () => {
     setStorySnippets([]);
     setDisplayedSnippets([]);
     setChoices([]);
+    setStoryInitialized(false);
+    setArcProgress(0);
+    setStoryPhase('setup');
+    setStoryComplete(false);
+    setChoicesMade(0);
+  }
+
+  // Get story phase label
+  const getPhaseLabel = (phase: string) => {
+    return phase.charAt(0).toUpperCase() + phase.slice(1);
+  };
+
+  // Get arc type display name
+  const getArcTypeDisplayName = (type: string) => {
+    return type.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  };
+
+  // Calculate estimated remaining choices
+  const getRemainingChoices = () => {
+    return Math.max(0, totalStoryChoices - choicesMade);
   };
 
   return (
-    <div key={isDarkMode} className="flex flex-col items-center justify-center min-h-screen py-2 bg-background">
+    <div className="flex flex-col items-center justify-center min-h-screen py-2 bg-background">
       {/* Dark Mode Toggle */}
       <div className="absolute top-4 right-4">
         <Button
@@ -211,22 +350,61 @@ export default function Home() {
             <CardDescription>Create your own adventure with AI.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <label htmlFor="theme" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Select Theme:
-              </label>
-              <Select value={theme} onValueChange={handleThemeChange} disabled={loading}>
-                <SelectTrigger className="w-[180px]" id="theme">
-                  <SelectValue placeholder="Theme" />
-                </SelectTrigger>
-                <SelectContent>
-                  {themes.map((t) => (
-                    <SelectItem key={t} value={t}>
-                      {t.charAt(0).toUpperCase() + t.slice(1)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center space-x-2">
+                <label htmlFor="theme" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Theme:
+                </label>
+                <Select value={theme} onValueChange={handleThemeChange} disabled={loading}>
+                  <SelectTrigger className="w-[120px]" id="theme">
+                    <SelectValue placeholder="Theme" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {themes.map((t) => (
+                      <SelectItem key={t} value={t}>
+                        {t.charAt(0).toUpperCase() + t.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <label htmlFor="arcType" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Story Arc:
+                </label>
+                <Select value={arcType} onValueChange={handleArcTypeChange} disabled={loading}>
+                  <SelectTrigger className="w-[140px]" id="arcType">
+                    <SelectValue placeholder="Arc Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {arcTypes.map((a) => (
+                      <SelectItem key={a} value={a}>
+                        {getArcTypeDisplayName(a)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={resetStory} 
+                disabled={loading}
+                className="ml-auto"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                New Story
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>{getPhaseLabel(storyPhase)}</span>
+                <span>{arcProgress}% ({getRemainingChoices()} choices remaining)</span>
+              </div>
+              <Progress value={arcProgress} className="h-2" />
             </div>
 
             <Separator />
@@ -252,7 +430,7 @@ export default function Home() {
             </ScrollArea>
 
             <div className="flex flex-wrap justify-center gap-2 mt-4">
-              {choices.length > 0 ? (
+              {choices.length > 0 && !storyComplete ? (
                 choices.map((choice) => (
                   <Button 
                     key={choice} 
@@ -264,9 +442,15 @@ export default function Home() {
                   </Button>
                 ))
               ) : (
-                !loading && storyInitialized.current && (
-                  <div className="text-center text-muted-foreground italic">
-                    The story has reached its conclusion.
+                storyComplete && (
+                  <div className="text-center text-muted-foreground">
+                    <p className="italic mb-2">The story has reached its conclusion.</p>
+                    <Button 
+                      onClick={resetStory} 
+                      variant="outline"
+                    >
+                      Start a New Adventure
+                    </Button>
                   </div>
                 )
               )}

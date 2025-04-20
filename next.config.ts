@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
-  distDir: 'out', // Add this line to explicitly set the output directory
+  // output: 'export',  // Remove or comment out this line
+  // distDir: 'out',    // Remove or comment out this line
   typescript: {
     ignoreBuildErrors: true,
   },
