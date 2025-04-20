@@ -41,3 +41,4 @@ yarn-error.log*
 next-env.d.ts
 
 .genkit/*
+.firebase/story-weaver-n3ub7/functions/node_modules/
