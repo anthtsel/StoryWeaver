@@ -1,6 +1,6 @@
 'use server';
 /**
- * @fileOverview Generates an initial story seed based on the selected theme.
+ * @fileOverview Generates an initial story seed based on the selected theme and arc type.
  *
  * - seedStory - A function that generates the initial story seed.
  * - SeedStoryInput - The input type for the seedStory function.
@@ -12,11 +12,12 @@ import { z } from 'genkit';
 
 const SeedStoryInputSchema = z.object({
   theme: z.string().describe('The theme of the story (e.g., space, fantasy, horror).'),
+  arcType: z.string().describe('The desired story arc (e.g., hero-journey, romance).')
 });
 export type SeedStoryInput = z.infer<typeof SeedStoryInputSchema>;
 
 const SeedStoryOutputSchema = z.object({
-  storySeed: z.string().describe('The initial story seed generated based on the theme.'),
+  storySeed: z.string().describe('The initial story seed generated based on the theme and arc type.'),
   initialChoices: z.array(z.string()).optional().describe('Initial choices for the user to select from.'),
 });
 export type SeedStoryOutput = z.infer<typeof SeedStoryOutputSchema>;
@@ -30,6 +31,7 @@ const prompt = ai.definePrompt({
   input: {
     schema: z.object({
       theme: z.string().describe('The theme of the story.'),
+      arcType: z.string().describe('The desired story arc (e.g., hero-journey, romance).')
     }),
   },
   output: {
@@ -38,27 +40,35 @@ const prompt = ai.definePrompt({
       initialChoices: z.array(z.string()).describe('Three initial choices for the player.'),
     }),
   },
-  prompt: `You are a creative story writer crafting the opening to a choose-your-own-adventure.
+  prompt: `You are a creative story writer crafting the opening scene of a unique, interactive choose-your-own-adventure story.
 
-The theme of the story is: {{{theme}}}
+The **theme** of the story is: {{{theme}}}  
+The **narrative arc** follows the structure of: {{{arcType}}}  
 
-Write a compelling story seed that:
-- Is **300-450 words** long (roughly 2000-2800 characters)
-- Introduces a strong hook and an immersive setting
-- Builds suspense, mystery, or intrigue
-- Ends at a **clear decision point** that sets the player up to make a choice
-- Uses second-person perspective ("you")
+Write a highly original **story seed** that meets the following:
 
-Follow the story seed with exactly **three distinct choices** for what the player could do next. Each choice must:
+- **Length**: 300–450 words (~2000–2800 characters)
+- **Hook**: Begin with a vivid, surprising, or emotionally charged event or moment that immediately draws the player into the story world.
+- **Worldbuilding**: Establish a unique and immersive setting that clearly reflects the chosen **theme** (e.g., sci-fi, horror, pirate fantasy).
+- **Arc Signal**: Introduce an inciting incident or scenario that **naturally aligns with the beginning of the {{{arcType}}} arc** (e.g., call to adventure, moral dilemma, rising tension).
+- **Tone & Atmosphere**: Use imagery, sensory language, and mood appropriate to the theme and arc.
+- **Perspective**: Write entirely in **second-person** (“you”) to make the player feel like the protagonist.
+- **Decision Point**: End the scene at a clear moment where the player must make a pivotal first choice.
+
+After the story seed, provide **exactly three distinct next actions** the player can take. Each choice must:
+
 - Be **concise** (max 8 words)
-- Lead to a **significantly different** outcome or direction
-- Reflect meaningful and believable decisions given the situation
+- Be **meaningfully different** (e.g., risky, cautious, curious)
+- Reflect a **believable reaction** in the context of the story
+- Propel the narrative forward in a way consistent with the chosen arc
 
-Example choices for a fantasy story:
-- "Open the glowing ancient tome"
-- "Sneak out of the library"
-- "Call for the headmaster"`,
+Example (for a fantasy "hero's journey" story):  
+- "Open the glowing ancient tome"  
+- "Sneak out of the library"  
+- "Call for the headmaster"
 
+Make each story seed **feel handcrafted** for the unique combination of {{{theme}}} and {{{arcType}}}.  
+Avoid clichés or generic setups — prioritize **novelty, specificity, and immersive tension**.`,
 });
 
 const seedStoryFlow = ai.defineFlow<

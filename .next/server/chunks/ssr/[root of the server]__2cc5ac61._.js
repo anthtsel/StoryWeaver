@@ -259,7 +259,7 @@ var { g: global, __dirname } = __turbopack_context__;
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$server$2d$reference$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/build/webpack/loaders/next-flight-loader/server-reference.js [app-rsc] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$app$2d$render$2f$encryption$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/app-render/encryption.js [app-rsc] (ecmascript)");
 /**
- * @fileOverview Generates an initial story seed based on the selected theme.
+ * @fileOverview Generates an initial story seed based on the selected theme and arc type.
  *
  * - seedStory - A function that generates the initial story seed.
  * - SeedStoryInput - The input type for the seedStory function.
@@ -273,10 +273,11 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 ;
 ;
 const SeedStoryInputSchema = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].object({
-    theme: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string().describe('The theme of the story (e.g., space, fantasy, horror).')
+    theme: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string().describe('The theme of the story (e.g., space, fantasy, horror).'),
+    arcType: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string().describe('The desired story arc (e.g., hero-journey, romance).')
 });
 const SeedStoryOutputSchema = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].object({
-    storySeed: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string().describe('The initial story seed generated based on the theme.'),
+    storySeed: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string().describe('The initial story seed generated based on the theme and arc type.'),
     initialChoices: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].array(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string()).optional().describe('Initial choices for the user to select from.')
 });
 async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ seedStory(input) {
@@ -286,7 +287,8 @@ const prompt = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$ai$2f$ai$2
     name: 'seedStoryPrompt',
     input: {
         schema: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].object({
-            theme: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string().describe('The theme of the story.')
+            theme: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string().describe('The theme of the story.'),
+            arcType: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string().describe('The desired story arc (e.g., hero-journey, romance).')
         })
     },
     output: {
@@ -295,26 +297,35 @@ const prompt = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$ai$2f$ai$2
             initialChoices: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].array(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string()).describe('Three initial choices for the player.')
         })
     },
-    prompt: `You are a creative story writer crafting the opening to a choose-your-own-adventure.
+    prompt: `You are a creative story writer crafting the opening scene of a unique, interactive choose-your-own-adventure story.
 
-The theme of the story is: {{{theme}}}
+The **theme** of the story is: {{{theme}}}  
+The **narrative arc** follows the structure of: {{{arcType}}}  
 
-Write a compelling story seed that:
-- Is **300-450 words** long (roughly 2000-2800 characters)
-- Introduces a strong hook and an immersive setting
-- Builds suspense, mystery, or intrigue
-- Ends at a **clear decision point** that sets the player up to make a choice
-- Uses second-person perspective ("you")
+Write a highly original **story seed** that meets the following:
 
-Follow the story seed with exactly **three distinct choices** for what the player could do next. Each choice must:
+- **Length**: 300–450 words (~2000–2800 characters)
+- **Hook**: Begin with a vivid, surprising, or emotionally charged event or moment that immediately draws the player into the story world.
+- **Worldbuilding**: Establish a unique and immersive setting that clearly reflects the chosen **theme** (e.g., sci-fi, horror, pirate fantasy).
+- **Arc Signal**: Introduce an inciting incident or scenario that **naturally aligns with the beginning of the {{{arcType}}} arc** (e.g., call to adventure, moral dilemma, rising tension).
+- **Tone & Atmosphere**: Use imagery, sensory language, and mood appropriate to the theme and arc.
+- **Perspective**: Write entirely in **second-person** (“you”) to make the player feel like the protagonist.
+- **Decision Point**: End the scene at a clear moment where the player must make a pivotal first choice.
+
+After the story seed, provide **exactly three distinct next actions** the player can take. Each choice must:
+
 - Be **concise** (max 8 words)
-- Lead to a **significantly different** outcome or direction
-- Reflect meaningful and believable decisions given the situation
+- Be **meaningfully different** (e.g., risky, cautious, curious)
+- Reflect a **believable reaction** in the context of the story
+- Propel the narrative forward in a way consistent with the chosen arc
 
-Example choices for a fantasy story:
-- "Open the glowing ancient tome"
-- "Sneak out of the library"
-- "Call for the headmaster"`
+Example (for a fantasy "hero's journey" story):  
+- "Open the glowing ancient tome"  
+- "Sneak out of the library"  
+- "Call for the headmaster"
+
+Make each story seed **feel handcrafted** for the unique combination of {{{theme}}} and {{{arcType}}}.  
+Avoid clichés or generic setups — prioritize **novelty, specificity, and immersive tension**.`
 });
 const seedStoryFlow = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$ai$2f$ai$2d$instance$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ai"].defineFlow({
     name: 'seedStoryFlow',
@@ -361,12 +372,17 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 ;
 const GenerateStorySnippetInputSchema = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].object({
     theme: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string().describe('The theme of the story (e.g., space, fantasy, horror).'),
+    arcType: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string().describe('The desired story arc (e.g., hero-journey, romance).'),
     previousSnippets: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].array(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string()).describe('An array of previous story snippets.'),
-    currentChoice: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string().describe("The user's current choice that influences the story.")
+    currentChoice: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string().describe("The user's current choice that influences the story."),
+    currentPhase: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string().describe('The current phase of the story arc (e.g., setup, rising action).'),
+    progress: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].number().describe('The overall progress percentage through the story arc (0-100).'),
+    isStoryComplete: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].boolean().optional().describe('Flag indicating if the story should conclude.') // Added optional flag to indicate story completion
 });
 const GenerateStorySnippetOutputSchema = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].object({
     nextSnippet: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string().describe('The next story snippet generated by the LLM.'),
-    nextChoices: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].array(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string()).describe('The next set of choices for the user to pick from.')
+    nextChoices: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].array(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string()).describe('The next set of choices for the user to pick from.'),
+    isStoryComplete: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].boolean().optional().describe('Whether the AI determines the story has reached a natural conclusion.')
 });
 async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ generateStorySnippet(input) {
     return generateStorySnippetFlow(input);
@@ -376,19 +392,26 @@ const prompt = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$ai$2f$ai$2
     input: {
         schema: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].object({
             theme: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string().describe('The theme of the story.'),
+            arcType: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string().describe('The desired story arc.'),
             previousSnippets: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].array(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string()).describe('Previous story snippets.'),
-            currentChoice: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string().describe("The user's current choice.")
+            currentChoice: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string().describe("The user's current choice."),
+            currentPhase: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string().describe('The current phase of the story arc.'),
+            progress: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].number().describe('The overall progress percentage (0-100).'),
+            isStoryComplete: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].boolean().optional().describe('Whether the story should conclude.')
         })
     },
     output: {
         schema: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].object({
             nextSnippet: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string().describe('The next story snippet.'),
-            nextChoices: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].array(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string()).describe('Three possible choices for the user to continue the story.')
+            nextChoices: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].array(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].string()).describe('Three possible choices for the user to continue the story.'),
+            isStoryComplete: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$genkit$2f$lib$2f$common$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["z"].boolean().optional().describe('Whether the story has concluded naturally.')
         })
     },
     prompt: `You are an AI Dungeon Master, weaving a choose-your-own-adventure story.
 
 The theme of the story is: {{{theme}}}
+The desired story arc is: {{{arcType}}}
+The story is currently in the {{{currentPhase}}} phase ({{progress}}% complete).
 
 Previous story snippets:
 {{#each previousSnippets}}
@@ -397,11 +420,16 @@ Previous story snippets:
 
 The user has chosen: {{{currentChoice}}}
 
+{{#if isStoryComplete}}
+Generate a concluding snippet for the story. This should provide a satisfying resolution based on the arc, theme, and previous choices. Do not provide any further choices. Mark the snippet with "THE END".
+{{else}}
 Generate the next part of the story based on the user's choice. Your response must include:
-1. A story snippet (nextSnippet) that continues the narrative using **300-450words** (approximately 2000-2800 characters). 
-2. Exactly three choices (nextChoices) for what the user could do next.
+1. A story snippet (nextSnippet) that continues the narrative using **300-450 words** (approximately 2000-2800 characters), ensuring it aligns with the {{{arcType}}} and the {{{currentPhase}}} of the story. Advance the plot meaningfully.
+2. Exactly three choices (nextChoices) for what the user could do next. These choices should be concise (max 8 words) and propel the story forward along the {{{arcType}}}.
+{{/if}}
 
-Make your story engaging and immersive. Use vivid imagery, sensory detail, and write in second person ("you"). Build tension or wonder as appropriate to the theme.`
+Make your story engaging and immersive. Use vivid imagery, sensory detail, and write in second person ("you"). Build tension or wonder as appropriate to the theme and arc. If the current phase is 'climax', make the situation very intense. If the phase is 'resolution', begin to wrap up the story threads.
+If you feel the story has reached a natural and satisfying conclusion based on the arc and progress, even if not explicitly told to end, you can choose to write a concluding snippet and set isStoryComplete to true in the output.`
 });
 const generateStorySnippetFlow = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$ai$2f$ai$2d$instance$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ai"].defineFlow({
     name: 'generateStorySnippetFlow',
@@ -421,8 +449,22 @@ const generateStorySnippetFlow = __TURBOPACK__imported__module__$5b$project$5d2f
                 ]
             };
         }
+        // Handle case where story should complete (either by input flag or AI decision)
+        if (input.isStoryComplete || output.isStoryComplete) {
+            console.log('Story completion triggered.', {
+                inputFlag: input.isStoryComplete,
+                outputFlag: output.isStoryComplete
+            });
+            return {
+                // Corrected line 99:
+                nextSnippet: output.nextSnippet.includes("THE END") ? output.nextSnippet : `${output.nextSnippet}\n\nTHE END.`,
+                nextChoices: [],
+                isStoryComplete: true
+            };
+        }
+        // Validate choices if story is not complete
         if (!output.nextChoices || !Array.isArray(output.nextChoices) || output.nextChoices.length === 0) {
-            console.error('Error: No valid choices returned from AI');
+            console.error('Error: No valid choices returned from AI for ongoing story');
             return {
                 nextSnippet: output.nextSnippet,
                 nextChoices: [
@@ -432,6 +474,7 @@ const generateStorySnippetFlow = __TURBOPACK__imported__module__$5b$project$5d2f
                 ]
             };
         }
+        // Ensure exactly 3 choices
         const choices = output.nextChoices.slice(0, 3);
         while(choices.length < 3){
             choices.push([
@@ -442,11 +485,13 @@ const generateStorySnippetFlow = __TURBOPACK__imported__module__$5b$project$5d2f
         }
         console.log('Story snippet generated successfully:', {
             snippetLength: output.nextSnippet.length,
-            choices: choices
+            choices: choices,
+            isStoryComplete: output.isStoryComplete ?? false
         });
         return {
             nextSnippet: output.nextSnippet,
-            nextChoices: choices
+            nextChoices: choices,
+            isStoryComplete: output.isStoryComplete ?? false
         };
     } catch (error) {
         console.error('Error in generateStorySnippetFlow:', error);
