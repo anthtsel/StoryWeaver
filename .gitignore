@@ -1,8 +1,55 @@
-diff
---- a/.gitignore
-+++ b/.gitignore
-@@ -1,2 +1,3 @@
- node_modules
- .next
- .env
-node_modules
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+out/
+.next/
+build/
+dist/
+
+# Environment variables
+.env*
+!.env.example
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Firebase
+.firebase/
+*.pid
+*.seed
+*.secret
+firebase-debug.log
+database-debug.log
+firestore-debug.log
+pubsub-debug.log
+storage-debug.log
+apphosting.emulator.yaml
+
+# Generated code
+dataconnect-generated/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE / Editor specific
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Test outputs
+coverage/
