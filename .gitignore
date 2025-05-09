@@ -13,6 +13,8 @@ dist/
 .env*
 !.env.example
 
+apphosting.yaml*
+
 # Logs
 logs
 *.log
@@ -53,3 +55,4 @@ Thumbs.db
 
 # Test outputs
 coverage/
+apphosting.yaml
